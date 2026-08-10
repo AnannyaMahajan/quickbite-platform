@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
-import { UtensilsCrossed, ShoppingBag, LogOut, Shield, Bike, Store, Compass, Layers } from 'lucide-react';
+import { UtensilsCrossed, ShoppingBag, LogOut, Shield, Bike, Store, Compass, Layers, UserRound, X } from 'lucide-react';
 
 export const Navbar = () => {
   const { user, demoLogin, logout } = useAuth();
@@ -18,6 +18,45 @@ export const Navbar = () => {
     if (role === 'DELIVERY_PARTNER') navigate('/delivery');
     if (role === 'ADMIN') navigate('/admin');
   };
+
+  const personas = [
+    {
+      role: 'CUSTOMER',
+      roleLabel: 'Customer',
+      name: 'Alex Johnson',
+      description: 'Browse, Cart & Orders',
+      icon: UserRound,
+      color: '#FF6B00',
+      bg: 'rgba(255, 107, 0, 0.08)'
+    },
+    {
+      role: 'RESTAURANT_OWNER',
+      roleLabel: 'Restaurant Owner',
+      name: 'Chef Marco Rossi',
+      description: 'Kitchen Queue & Menu',
+      icon: Store,
+      color: '#16A34A',
+      bg: 'rgba(22, 163, 74, 0.08)'
+    },
+    {
+      role: 'DELIVERY_PARTNER',
+      roleLabel: 'Delivery Partner',
+      name: 'David Vance',
+      description: 'Rider App & Deliveries',
+      icon: Bike,
+      color: '#3B82F6',
+      bg: 'rgba(59, 130, 246, 0.08)'
+    },
+    {
+      role: 'ADMIN',
+      roleLabel: 'Platform Admin',
+      name: 'Sarah Connor',
+      description: 'Fleet, GMV & Disputes',
+      icon: Shield,
+      color: '#8B5CF6',
+      bg: 'rgba(139, 92, 246, 0.08)'
+    }
+  ];
 
   return (
     <header style={{ position: 'sticky', top: 0, zIndex: 100 }}>
@@ -85,21 +124,21 @@ export const Navbar = () => {
                 </Link>
               )}
 
-              {/* Discrete Demo Switcher Button for Testing */}
+              {/* Discrete Demo Switcher Button */}
               <button
                 onClick={() => setShowDemoModal(true)}
                 className="btn btn-secondary btn-sm"
                 title="Switch Persona Demo"
-                style={{ fontSize: '0.78rem', background: 'rgba(99, 102, 241, 0.12)', color: '#4f46e5', border: '1px solid rgba(99, 102, 241, 0.3)' }}
+                style={{ fontSize: '0.78rem', background: 'rgba(255, 107, 0, 0.08)', color: '#FF6B00', border: '1px solid rgba(255, 107, 0, 0.25)' }}
               >
                 <Layers size={14} /> Demo Persona
               </button>
 
               {/* User Profile Info & Logout */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, paddingLeft: 12, borderLeft: '1px solid var(--border-color)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, paddingLeft: 12, borderLeft: '1px solid #E2E8F0' }}>
                 <div style={{ fontSize: '0.82rem', textAlign: 'right' }}>
-                  <div style={{ fontWeight: 800, color: 'var(--text-main)' }}>{user.name}</div>
-                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>{user.role.replace(/_/g, ' ')}</div>
+                  <div style={{ fontWeight: 700, color: '#172033' }}>{user.name}</div>
+                  <div style={{ fontSize: '0.72rem', color: '#64748B', fontWeight: 600 }}>{user.role.replace(/_/g, ' ')}</div>
                 </div>
                 <button onClick={logout} className="btn btn-secondary btn-sm" title="Log out">
                   <LogOut size={16} />
@@ -113,7 +152,7 @@ export const Navbar = () => {
               <button
                 onClick={() => setShowDemoModal(true)}
                 className="btn btn-secondary btn-sm"
-                style={{ fontSize: '0.78rem', background: 'rgba(99, 102, 241, 0.12)', color: '#4f46e5', border: '1px solid rgba(99, 102, 241, 0.3)' }}
+                style={{ fontSize: '0.78rem', background: 'rgba(255, 107, 0, 0.08)', color: '#FF6B00', border: '1px solid rgba(255, 107, 0, 0.25)' }}
               >
                 <Layers size={14} /> Demo Switcher
               </button>
@@ -124,31 +163,111 @@ export const Navbar = () => {
         </div>
       </nav>
 
-      {/* Discrete Persona Switcher Modal */}
+      {/* Switch Demo Persona Modal */}
       {showDemoModal && (
-        <div className="modal-overlay" onClick={() => setShowDemoModal(false)}>
-          <div className="modal-container" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 420 }}>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: 8, color: 'var(--text-main)' }}>Switch Demo Persona</h3>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: 20 }}>
-              Select a stakeholder role to instantly log in as a pre-configured account:
-            </p>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <button onClick={() => handleRoleSwitch('CUSTOMER')} className="btn btn-secondary" style={{ justifyContent: 'flex-start', padding: 12 }}>
-                👤 <strong>Customer:</strong> Alex Johnson (Browse, Cart, Order)
-              </button>
-              <button onClick={() => handleRoleSwitch('RESTAURANT_OWNER')} className="btn btn-secondary" style={{ justifyContent: 'flex-start', padding: 12 }}>
-                🏪 <strong>Restaurant Owner:</strong> Chef Marco Rossi (Kitchen Queue, Menu)
-              </button>
-              <button onClick={() => handleRoleSwitch('DELIVERY_PARTNER')} className="btn btn-secondary" style={{ justifyContent: 'flex-start', padding: 12 }}>
-                🛵 <strong>Delivery Partner:</strong> David Vance (Rider App, Reassignment)
-              </button>
-              <button onClick={() => handleRoleSwitch('ADMIN')} className="btn btn-secondary" style={{ justifyContent: 'flex-start', padding: 12 }}>
-                🛡️ <strong>Platform Admin:</strong> Sarah Connor (Fleet Monitor, GMV, Disputes)
+        <div
+          className="modal-overlay"
+          onClick={() => setShowDemoModal(false)}
+          style={{ background: 'rgba(15, 23, 42, 0.35)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)' }}
+        >
+          <div
+            className="modal-container"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              maxWidth: 520,
+              width: 'calc(100% - 32px)',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              borderRadius: 16,
+              padding: 24,
+              boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)'
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
+              <h3 style={{ fontSize: '1.4rem', fontWeight: 700, color: '#172033', margin: 0 }}>Switch Demo Persona</h3>
+              <button
+                onClick={() => setShowDemoModal(false)}
+                style={{ background: 'none', border: 'none', color: '#94A3B8', cursor: 'pointer', padding: 4 }}
+                aria-label="Close modal"
+              >
+                <X size={20} />
               </button>
             </div>
+            <p style={{ fontSize: '0.88rem', color: '#64748B', lineHeight: 1.5, marginBottom: 20 }}>
+              Select a stakeholder role to instantly log in as a pre-configured account.
+            </p>
 
-            <button onClick={() => setShowDemoModal(false)} className="btn btn-secondary" style={{ width: '100%', marginTop: 16 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {personas.map((p) => {
+                const IconComponent = p.icon;
+
+                return (
+                  <button
+                    key={p.role}
+                    onClick={() => handleRoleSwitch(p.role)}
+                    aria-label={`Switch to ${p.roleLabel} demo persona`}
+                    className="persona-card-btn"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: 14,
+                      padding: 16,
+                      background: '#F8FAFC',
+                      border: '1px solid #E2E8F0',
+                      borderRadius: 12,
+                      textAlign: 'left',
+                      width: '100%',
+                      cursor: 'pointer',
+                      transition: 'all 150ms ease'
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: 42,
+                        height: 42,
+                        borderRadius: 10,
+                        background: p.bg,
+                        color: p.color,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0
+                      }}
+                    >
+                      <IconComponent size={22} />
+                    </div>
+
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: '1rem', fontWeight: 700, color: '#172033' }}>
+                        {p.roleLabel}
+                      </div>
+                      <div style={{ fontSize: '0.92rem', fontWeight: 600, color: '#334155', marginTop: 1 }}>
+                        {p.name}
+                      </div>
+                      <div style={{ fontSize: '0.82rem', color: '#64748B', marginTop: 2, whiteSpace: 'normal', overflowWrap: 'anywhere' }}>
+                        {p.description}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            <button
+              onClick={() => setShowDemoModal(false)}
+              style={{
+                width: '100%',
+                marginTop: 20,
+                padding: '10px 18px',
+                background: '#FFFFFF',
+                border: '1px solid #CBD5E1',
+                borderRadius: 8,
+                color: '#334155',
+                fontWeight: 600,
+                fontSize: '0.88rem',
+                cursor: 'pointer'
+              }}
+            >
               Close
             </button>
           </div>

@@ -373,6 +373,12 @@ h4, h5, h6 {
   box-shadow: var(--shadow-lg);
 }
 
+.persona-card-btn:hover, .persona-card-btn:focus-visible {
+  border-color: #FF6B00 !important;
+  background: #FFF7ED !important;
+  transform: translateY(-1px);
+}
+
 .toast-container {
   position: fixed;
   bottom: 20px;
