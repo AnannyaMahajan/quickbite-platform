@@ -18,7 +18,7 @@ export const assignDeliveryPartner = async (orderId) => {
     isApproved: true,
     isSuspended: false,
     _id: { $nin: excludedPartnerIds }
-  }).sort({ currentActiveDeliveries: 1, rating: -1 });
+  });
 
   if (candidatePartners.length === 0) {
     console.log(`⚠️ No available delivery partner found for Order #${order.orderNumber}`);
@@ -33,6 +33,16 @@ export const assignDeliveryPartner = async (orderId) => {
 
     return null;
   }
+
+  // Prioritize primary demo delivery partner (delivery@quickbite.com) for initial assignment
+  candidatePartners.sort((a, b) => {
+    if (a.email === 'delivery@quickbite.com') return -1;
+    if (b.email === 'delivery@quickbite.com') return 1;
+    if (a.currentActiveDeliveries !== b.currentActiveDeliveries) {
+      return a.currentActiveDeliveries - b.currentActiveDeliveries;
+    }
+    return b.rating - a.rating;
+  });
 
   const selectedPartner = candidatePartners[0];
 
@@ -64,7 +74,7 @@ export const assignDeliveryPartner = async (orderId) => {
     reassigned: existingAssignments.length > 0
   }, [`user:${selectedPartner._id}`]);
 
-  console.log(`✅ Order #${order.orderNumber} assigned to Delivery Partner: ${selectedPartner.name} (Attempt #${existingAssignments.length + 1})`);
+  console.log(`✅ Order #${order.orderNumber} assigned to Delivery Partner: ${selectedPartner.name} (${selectedPartner.email}) (Attempt #${existingAssignments.length + 1})`);
   return assignment;
 };
 
