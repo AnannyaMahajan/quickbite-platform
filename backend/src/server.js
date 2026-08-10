@@ -33,9 +33,18 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(apiRateLimiter);
 
-// Database Connection Middleware for Serverless / Local
+// Health check endpoints (Placed BEFORE DB middleware so health check always responds 200 OK)
+app.get(['/health', '/api/health'], (req, res) => {
+  res.status(200).json({
+    success: true,
+    status: 'UP',
+    platform: 'QuickBite Food Delivery Platform',
+    timestamp: new Date()
+  });
+});
+
+// Database Connection Middleware for Serverless Execution
 app.use(async (req, res, next) => {
-  if (req.path === '/health' || req.path === '/api/health') return next();
   try {
     await connectDB();
     next();
@@ -45,23 +54,6 @@ app.use(async (req, res, next) => {
       message: err.message || 'Database Connection Error. Please verify MONGODB_URI configuration.'
     });
   }
-});
-
-// Seed Database (Triggered in Background)
-connectDB().then(async () => {
-  await seedDatabase();
-}).catch((err) => {
-  console.warn('Database initialization warning:', err.message);
-});
-
-// Health check endpoints
-app.get(['/health', '/api/health'], (req, res) => {
-  res.status(200).json({
-    success: true,
-    status: 'UP',
-    platform: 'QuickBite Food Delivery Platform',
-    timestamp: new Date()
-  });
 });
 
 // API Routes
@@ -78,8 +70,14 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-// Local Development Guard: Only call server.listen when NOT running inside Vercel Function
+// Local Development Guard: Only call server.listen & seed when NOT running inside Vercel Function
 if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+  connectDB().then(async () => {
+    await seedDatabase();
+  }).catch((err) => {
+    console.warn('Local database initialization warning:', err.message);
+  });
+
   server.listen(PORT, () => {
     console.log(`\n==================================================`);
     console.log(`🚀 QuickBite Server Running on Port: ${PORT}`);
