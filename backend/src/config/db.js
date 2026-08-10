@@ -42,14 +42,18 @@ export const connectDB = async () => {
     console.warn('⚠️ Primary MongoDB connection failed:', e.message);
     cached.promise = null;
 
-    if (!global.__MONGO_MEMORY_SERVER__) {
-      console.log('⚡ Falling back to in-memory MongoMemoryServer database...');
-      const mongod = await MongoMemoryServer.create({ instance: { dbName: 'quickbite_db' } });
-      global.__MONGO_MEMORY_SERVER__ = mongod;
-      const fallbackUri = mongod.getUri();
-      cached.conn = await mongoose.connect(fallbackUri, { bufferCommands: false, autoIndex: true });
-    } else {
-      throw e;
+    try {
+      if (!global.__MONGO_MEMORY_SERVER__) {
+        console.log('⚡ Falling back to in-memory MongoMemoryServer database...');
+        const mongod = await MongoMemoryServer.create({ instance: { dbName: 'quickbite_db' } });
+        global.__MONGO_MEMORY_SERVER__ = mongod;
+      }
+      const fallbackUri = global.__MONGO_MEMORY_SERVER__.getUri();
+      cached.promise = mongoose.connect(fallbackUri, { bufferCommands: false, autoIndex: true });
+      cached.conn = await cached.promise;
+    } catch (fallbackErr) {
+      cached.promise = null;
+      throw fallbackErr;
     }
   }
 
