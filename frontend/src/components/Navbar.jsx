@@ -90,16 +90,16 @@ export const Navbar = () => {
                 onClick={() => setShowDemoModal(true)}
                 className="btn btn-secondary btn-sm"
                 title="Switch Persona Demo"
-                style={{ fontSize: '0.78rem', background: 'rgba(99, 102, 241, 0.15)', color: '#a5b4fc', border: '1px solid rgba(99, 102, 241, 0.3)' }}
+                style={{ fontSize: '0.78rem', background: 'rgba(99, 102, 241, 0.12)', color: '#4f46e5', border: '1px solid rgba(99, 102, 241, 0.3)' }}
               >
                 <Layers size={14} /> Demo Persona
               </button>
 
               {/* User Profile Info & Logout */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, paddingLeft: 10, borderLeft: '1px solid #334155' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, paddingLeft: 12, borderLeft: '1px solid var(--border-color)' }}>
                 <div style={{ fontSize: '0.82rem', textAlign: 'right' }}>
-                  <div style={{ fontWeight: 700, color: '#f8fafc' }}>{user.name}</div>
-                  <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>{user.role.replace(/_/g, ' ')}</div>
+                  <div style={{ fontWeight: 800, color: 'var(--text-main)' }}>{user.name}</div>
+                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>{user.role.replace(/_/g, ' ')}</div>
                 </div>
                 <button onClick={logout} className="btn btn-secondary btn-sm" title="Log out">
                   <LogOut size={16} />
@@ -113,7 +113,7 @@ export const Navbar = () => {
               <button
                 onClick={() => setShowDemoModal(true)}
                 className="btn btn-secondary btn-sm"
-                style={{ fontSize: '0.78rem', background: 'rgba(99, 102, 241, 0.15)', color: '#a5b4fc', border: '1px solid rgba(99, 102, 241, 0.3)' }}
+                style={{ fontSize: '0.78rem', background: 'rgba(99, 102, 241, 0.12)', color: '#4f46e5', border: '1px solid rgba(99, 102, 241, 0.3)' }}
               >
                 <Layers size={14} /> Demo Switcher
               </button>
@@ -128,8 +128,8 @@ export const Navbar = () => {
       {showDemoModal && (
         <div className="modal-overlay" onClick={() => setShowDemoModal(false)}>
           <div className="modal-container" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 420 }}>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: 8 }}>Switch Demo Persona</h3>
-            <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: 20 }}>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: 8, color: 'var(--text-main)' }}>Switch Demo Persona</h3>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: 20 }}>
               Select a stakeholder role to instantly log in as a pre-configured account:
             </p>
 
