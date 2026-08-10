@@ -31,7 +31,7 @@ api.interceptors.response.use((response) => {
   return response;
 }, (error) => {
   if (error.response && error.response.status === 401) {
-    console.warn('Unauthorized request. Clearing auth state.');
+    console.warn('Unauthorized request (401). Clearing token.');
     localStorage.removeItem('quickbite_token');
     localStorage.removeItem('quickbite_user');
   }

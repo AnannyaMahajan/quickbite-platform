@@ -38,10 +38,11 @@ export const AuthProvider = ({ children }) => {
     try {
       const res = await api.post('/auth/login', { email, password });
       if (res.data.success) {
-        setToken(res.data.token);
-        setUser(res.data.user);
+        // Synchronously update localStorage BEFORE updating React state
         localStorage.setItem('quickbite_token', res.data.token);
         localStorage.setItem('quickbite_user', JSON.stringify(res.data.user));
+        setToken(res.data.token);
+        setUser(res.data.user);
         return { success: true };
       }
     } catch (error) {

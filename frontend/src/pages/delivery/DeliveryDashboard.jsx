@@ -6,7 +6,7 @@ import { Bike, MapPin, Store, CheckCircle, Navigation, Power } from 'lucide-reac
 import { useSocket } from '../../context/SocketContext';
 
 export const DeliveryDashboard = () => {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const [assignments, setAssignments] = useState([]);
   const [history, setHistory] = useState([]);
   const [earnings, setEarnings] = useState(null);
@@ -15,10 +15,11 @@ export const DeliveryDashboard = () => {
   const { addToast } = useSocket();
 
   useEffect(() => {
+    if (!token || !user) return;
     fetchDeliveryData();
     const interval = setInterval(fetchAssignmentsOnly, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [token, user]);
 
   const fetchDeliveryData = async () => {
     try {
@@ -108,13 +109,13 @@ export const DeliveryDashboard = () => {
 
   return (
     <div className="main-content theme-dark" style={{ maxWidth: 760 }}>
-      {/* Driver Header & Duty Controls */}
+      {/* Header Greeting & Duty Control */}
       <div className="card" style={{ marginBottom: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 14 }}>
         <div>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: 2 }}>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#ffffff', marginBottom: 2 }}>
             Good morning, {driverName} 👋
           </h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem' }}>
+          <p style={{ color: '#cbd5e1', fontSize: '0.88rem' }}>
             You're {isAvailable ? 'online and ready for deliveries.' : 'currently offline.'}
           </p>
         </div>
@@ -129,34 +130,39 @@ export const DeliveryDashboard = () => {
         </div>
       </div>
 
-      {/* Driver Progress Bar */}
-      <div className="card" style={{ marginBottom: 24, display: 'flex', justifyContent: 'space-around', alignItems: 'center', textAlign: 'center', padding: '14px 20px' }}>
-        <div>
-          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>Today's Earnings</div>
-          <div style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--primary)' }}>${earnings?.totalEarnings || 0}</div>
+      {/* Today's Progress Bar Card */}
+      <div className="card" style={{ marginBottom: 24, padding: '16px 20px' }}>
+        <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 12 }}>
+          Today's progress
         </div>
-        <div style={{ width: 1, height: 32, background: 'var(--border-color)' }} />
-        <div>
-          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>Completed Deliveries</div>
-          <div style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--text-main)' }}>{earnings?.totalCompleted || 0}</div>
-        </div>
-        <div style={{ width: 1, height: 32, background: 'var(--border-color)' }} />
-        <div>
-          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>Per Trip Payout</div>
-          <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#38bdf8' }}>$45</div>
+        <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', textAlign: 'center' }}>
+          <div>
+            <div style={{ fontSize: '0.78rem', color: '#cbd5e1', fontWeight: 600 }}>Today's earnings</div>
+            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--primary)' }}>${earnings?.totalEarnings || 0}</div>
+          </div>
+          <div style={{ width: 1, height: 32, background: 'var(--border-color)' }} />
+          <div>
+            <div style={{ fontSize: '0.78rem', color: '#cbd5e1', fontWeight: 600 }}>Completed today</div>
+            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#ffffff' }}>{earnings?.totalCompleted || 0}</div>
+          </div>
+          <div style={{ width: 1, height: 32, background: 'var(--border-color)' }} />
+          <div>
+            <div style={{ fontSize: '0.78rem', color: '#cbd5e1', fontWeight: 600 }}>Per-trip payout</div>
+            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#38bdf8' }}>$45</div>
+          </div>
         </div>
       </div>
 
-      {/* Active Trip Task */}
-      <h2 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
-        <Bike size={22} style={{ color: 'var(--primary)' }} /> Current Active Trip
+      {/* Current Delivery Task */}
+      <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#ffffff', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
+        <Bike size={22} style={{ color: 'var(--primary)' }} /> Your next delivery
       </h2>
 
       {assignments.length === 0 ? (
-        <div className="card" style={{ textAlign: 'center', padding: '36px 20px', color: 'var(--text-muted)', marginBottom: 28 }}>
-          <Bike size={36} style={{ color: 'var(--text-muted)', marginBottom: 8 }} />
-          <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: 4 }}>No delivery assigned yet</h3>
-          <p style={{ fontSize: '0.85rem' }}>Stay online and we'll let you know when a delivery comes in.</p>
+        <div className="card" style={{ textAlign: 'center', padding: '32px 20px', color: '#cbd5e1', marginBottom: 28 }}>
+          <Bike size={36} style={{ color: 'var(--primary)', marginBottom: 8 }} />
+          <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#ffffff', marginBottom: 4 }}>You're all caught up</h3>
+          <p style={{ fontSize: '0.86rem', color: '#94a3b8' }}>Stay online and we'll send your next delivery here.</p>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 28 }}>
@@ -177,19 +183,19 @@ export const DeliveryDashboard = () => {
                 {/* Pickup & Dropoff */}
                 <div className="grid-2" style={{ marginBottom: 16 }}>
                   <div style={{ background: 'var(--bg-page)', padding: 12, borderRadius: 'var(--radius-sm)' }}>
-                    <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4 }}>
+                    <div style={{ fontSize: '0.74rem', color: '#94a3b8', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4 }}>
                       <Store size={14} style={{ color: 'var(--primary)' }} /> PICK UP FROM
                     </div>
-                    <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-main)' }}>{order.restaurantId?.name}</div>
-                    <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>{order.restaurantId?.address?.street}</div>
+                    <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#ffffff' }}>{order.restaurantId?.name}</div>
+                    <div style={{ fontSize: '0.82rem', color: '#cbd5e1' }}>{order.restaurantId?.address?.street}</div>
                   </div>
 
                   <div style={{ background: 'var(--bg-page)', padding: 12, borderRadius: 'var(--radius-sm)' }}>
-                    <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4 }}>
+                    <div style={{ fontSize: '0.74rem', color: '#94a3b8', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4 }}>
                       <MapPin size={14} style={{ color: '#38bdf8' }} /> DELIVER TO
                     </div>
-                    <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-main)' }}>{order.customerId?.name} ({order.customerId?.phone})</div>
-                    <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>{order.deliveryAddress?.street}, {order.deliveryAddress?.city}</div>
+                    <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#ffffff' }}>{order.customerId?.name} ({order.customerId?.phone})</div>
+                    <div style={{ fontSize: '0.82rem', color: '#cbd5e1' }}>{order.deliveryAddress?.street}, {order.deliveryAddress?.city}</div>
                   </div>
                 </div>
 
