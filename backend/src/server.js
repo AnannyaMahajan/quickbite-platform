@@ -5,7 +5,6 @@ import helmet from 'helmet';
 import dotenv from 'dotenv';
 import { connectDB } from './config/db.js';
 import { initSocket } from './config/socket.js';
-import { seedDatabase } from './services/seedData.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { apiRateLimiter } from './middleware/rateLimiter.js';
 
@@ -70,11 +69,9 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-// Local Development Guard: Only call server.listen & seed when NOT running inside Vercel Function
+// Local Development Guard: Only call server.listen when NOT running inside Vercel Function
 if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
-  connectDB().then(async () => {
-    await seedDatabase();
-  }).catch((err) => {
+  connectDB().catch((err) => {
     console.warn('Local database initialization warning:', err.message);
   });
 

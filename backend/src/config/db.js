@@ -1,8 +1,11 @@
 import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
+import { seedDatabase } from '../services/seedData.js';
 
 let cached = global.mongoose || { conn: null, promise: null };
 global.mongoose = cached;
+
+let seedPromise = global.seedPromise || null;
 
 export const connectDB = async () => {
   let mongoUri = process.env.MONGODB_URI;
@@ -23,10 +26,6 @@ export const connectDB = async () => {
     }
   }
 
-  if (cached.conn) {
-    return cached.conn;
-  }
-
   if (!cached.promise) {
     cached.promise = mongoose.connect(mongoUri, {
       bufferCommands: false,
@@ -43,6 +42,24 @@ export const connectDB = async () => {
   } catch (e) {
     cached.promise = null;
     throw e;
+  }
+
+  // Idempotent Seed Guard: Runs once if the database contains 0 users
+  if (!global.isSeeded && !global.seedPromise) {
+    global.seedPromise = (async () => {
+      try {
+        await seedDatabase();
+        global.isSeeded = true;
+      } catch (err) {
+        console.warn('Idempotent database seeding warning:', err.message);
+      } finally {
+        global.seedPromise = null;
+      }
+    })();
+  }
+
+  if (global.seedPromise) {
+    await global.seedPromise;
   }
 
   return cached.conn;
