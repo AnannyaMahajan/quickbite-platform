@@ -1,6 +1,14 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const getApiBaseUrl = () => {
+  if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    return '/api';
+  }
+  return 'http://localhost:5000/api';
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -23,7 +31,6 @@ api.interceptors.response.use((response) => {
   return response;
 }, (error) => {
   if (error.response && error.response.status === 401) {
-    // Session expired or invalid JWT
     console.warn('Unauthorized request. Clearing auth state.');
     localStorage.removeItem('quickbite_token');
     localStorage.removeItem('quickbite_user');

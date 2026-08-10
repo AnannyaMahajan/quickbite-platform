@@ -8,6 +8,11 @@ export const connectDB = async () => {
   let mongoUri = process.env.MONGODB_URI;
 
   if (!mongoUri) {
+    if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
+      console.warn('⚠️ MONGODB_URI environment variable is missing in production deployment.');
+      throw new Error('MONGODB_URI environment variable is not configured in Vercel project settings.');
+    }
+
     if (!global.__MONGO_MEMORY_SERVER__) {
       console.log('⚡ MONGODB_URI not provided. Launching local MongoMemoryServer engine...');
       const mongod = await MongoMemoryServer.create({ instance: { dbName: 'quickbite_db' } });

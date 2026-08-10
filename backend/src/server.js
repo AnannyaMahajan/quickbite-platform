@@ -33,11 +33,25 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(apiRateLimiter);
 
-// Connect DB & Seed Database
+// Database Connection Middleware for Serverless / Local
+app.use(async (req, res, next) => {
+  if (req.path === '/health' || req.path === '/api/health') return next();
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message || 'Database Connection Error. Please verify MONGODB_URI configuration.'
+    });
+  }
+});
+
+// Seed Database (Triggered in Background)
 connectDB().then(async () => {
   await seedDatabase();
 }).catch((err) => {
-  console.error('Database connection / seed initialization error:', err);
+  console.warn('Database initialization warning:', err.message);
 });
 
 // Health check endpoints
