@@ -20,7 +20,7 @@ export const OrderTracking = () => {
 
   useEffect(() => {
     fetchOrder();
-    const interval = setInterval(fetchOrder, 5000); // Polling backup alongside WebSockets
+    const interval = setInterval(fetchOrder, 5000);
     return () => clearInterval(interval);
   }, [id]);
 
@@ -57,76 +57,105 @@ export const OrderTracking = () => {
     }
   };
 
-  if (loading) return <div className="main-content" style={{ padding: 60, textAlign: 'center' }}>Loading live order tracking...</div>;
-  if (!order) return <div className="main-content">Order not found</div>;
+  if (loading) return (
+    <div className="main-content" style={{ padding: '80px 20px', textAlign: 'center' }}>
+      <div className="skeleton" style={{ height: 28, width: 240, margin: '0 auto 16px' }} />
+      <p style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Tracking your delivery in real-time...</p>
+    </div>
+  );
+
+  if (!order) return (
+    <div className="main-content" style={{ textAlign: 'center', padding: '60px 20px' }}>
+      <h2>Order Not Found</h2>
+      <p style={{ color: 'var(--text-muted)', marginTop: 8 }}>We couldn't locate the requested order reference.</p>
+    </div>
+  );
 
   const canCancel = order.status === 'PLACED';
 
+  const getStatusHeadline = () => {
+    switch (order.status) {
+      case 'PLACED': return 'Order placed! Waiting for restaurant to accept...';
+      case 'RESTAURANT_ACCEPTED': return 'Restaurant accepted your order!';
+      case 'PREPARING': return 'Chef is preparing your meal in the kitchen 🍳';
+      case 'READY_FOR_PICKUP': return 'Food is ready! Waiting for rider pickup 🛵';
+      case 'DELIVERY_ASSIGNED': return 'Rider assigned & heading to restaurant 🚴';
+      case 'AT_RESTAURANT': return 'Rider arrived at restaurant 📍';
+      case 'PICKED_UP': return 'Food picked up! Rider is on the way 🚀';
+      case 'OUT_FOR_DELIVERY': return 'Almost there! Rider is nearby 🚚';
+      case 'DELIVERED': return 'Delivered! Enjoy your meal 😋';
+      case 'CANCELLED': return 'Order Cancelled';
+      default: return 'Live Delivery Tracking';
+    }
+  };
+
   return (
-    <div className="main-content" style={{ maxWidth: 900 }}>
-      {/* Header Info */}
-      <div className="card" style={{ marginBottom: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <div className="main-content" style={{ maxWidth: 920 }}>
+      {/* Header Summary */}
+      <div className="card" style={{ marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 14 }}>
         <div>
-          <div style={{ fontSize: '0.85rem', color: '#94a3b8' }}>Order Reference Number</div>
-          <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--primary)' }}>#{order.orderNumber}</div>
+          <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Order Reference Number</div>
+          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--primary)' }}>#{order.orderNumber}</div>
         </div>
         <StatusBadge status={order.status} />
       </div>
 
       {cancelError && (
-        <div style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.4)', color: '#f87171', padding: 14, borderRadius: 12, marginBottom: 20, display: 'flex', alignItems: 'center', gap: 10 }}>
-          <AlertCircle size={20} />
+        <div style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.35)', color: '#f87171', padding: 16, borderRadius: 'var(--radius-md)', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 12 }}>
+          <AlertCircle size={22} />
           <span>{cancelError}</span>
         </div>
       )}
 
-      {/* Visual Multi-step State Timeline */}
-      <div className="card" style={{ marginBottom: 20 }}>
-        <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: 10 }}>Live Delivery Progress</h3>
+      {/* Visual State Timeline */}
+      <div className="card" style={{ marginBottom: 24 }}>
+        <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: 16, color: 'var(--primary)' }}>
+          {getStatusHeadline()}
+        </h3>
         <OrderTimeline status={order.status} />
       </div>
 
-      {/* Driver & Restaurant Details Grid */}
-      <div className="grid-2" style={{ marginBottom: 20 }}>
-        {/* Restaurant Card */}
-        <div className="card" style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
-          <Store size={32} style={{ color: 'var(--primary)' }} />
+      {/* Driver & Restaurant Details */}
+      <div className="grid-2" style={{ marginBottom: 24 }}>
+        {/* Restaurant Info */}
+        <div className="card" style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+          <Store size={36} style={{ color: 'var(--primary)' }} />
           <div>
-            <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>Restaurant</div>
-            <div style={{ fontWeight: 700, fontSize: '1rem' }}>{order.restaurantId?.name}</div>
-            <div style={{ fontSize: '0.82rem', color: '#cbd5e1' }}>{order.restaurantId?.address?.street}</div>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Restaurant</div>
+            <div style={{ fontWeight: 800, fontSize: '1.05rem' }}>{order.restaurantId?.name}</div>
+            <div style={{ fontSize: '0.85rem', color: '#cbd5e1' }}>{order.restaurantId?.address?.street}</div>
           </div>
         </div>
 
-        {/* Assigned Rider Card */}
-        <div className="card" style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
-          <Bike size={32} style={{ color: '#06b6d4' }} />
+        {/* Assigned Rider Info */}
+        <div className="card" style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+          <Bike size={36} style={{ color: '#06b6d4' }} />
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>Assigned Delivery Partner</div>
-            <div style={{ fontWeight: 700, fontSize: '1rem' }}>
-              {order.assignedDeliveryPartnerId ? order.assignedDeliveryPartnerId.name : 'Searching nearby riders...'}
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Delivery Partner</div>
+            <div style={{ fontWeight: 800, fontSize: '1.05rem' }}>
+              {order.assignedDeliveryPartnerId ? order.assignedDeliveryPartnerId.name : 'Finding nearest rider...'}
             </div>
             {order.assignedDeliveryPartnerId && (
-              <div style={{ fontSize: '0.82rem', color: '#cbd5e1', display: 'flex', alignItems: 'center', gap: 6 }}>
-                <Phone size={12} /> {order.assignedDeliveryPartnerId.phone} • ⭐ {order.assignedDeliveryPartnerId.rating}
+              <div style={{ fontSize: '0.85rem', color: '#cbd5e1', display: 'flex', alignItems: 'center', gap: 8, marginTop: 2 }}>
+                <Phone size={14} /> {order.assignedDeliveryPartnerId.phone} • ⭐ {order.assignedDeliveryPartnerId.rating}
               </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* Actions & Items Card */}
+      {/* Order Summary & Actions */}
       <div className="card">
-        <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: 16, borderBottom: '1px solid #334155', paddingBottom: 8 }}>Order Summary</h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
+        <h3 style={{ fontSize: '1.15rem', fontWeight: 800, marginBottom: 18, borderBottom: '1px solid var(--border-color)', paddingBottom: 10 }}>Order Items</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24 }}>
           {order.items.map((i) => (
-            <div key={i.menuItemId} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
-              <span>{i.name} x {i.quantity}</span>
+            <div key={i.menuItemId} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.92rem' }}>
+              <span>{i.name} × {i.quantity}</span>
               <span style={{ fontWeight: 700 }}>${i.subtotal}</span>
             </div>
           ))}
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, fontSize: '1.1rem', color: 'var(--primary)', paddingTop: 10, borderTop: '1px dashed #334155' }}>
-            <span>Grand Total Paid</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, fontSize: '1.15rem', color: 'var(--primary)', paddingTop: 12, borderTop: '1px dashed var(--border-color)' }}>
+            <span>Total Amount Paid</span>
             <span>${order.grandTotal}</span>
           </div>
         </div>
@@ -135,7 +164,7 @@ export const OrderTracking = () => {
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
           {canCancel && (
             <button onClick={handleCancelOrder} disabled={cancelling} className="btn btn-danger btn-sm">
-              {cancelling ? 'Cancelling...' : 'Cancel Order (Before Prep Starts)'}
+              {cancelling ? 'Cancelling...' : 'Cancel Order (Before Kitchen Prep)'}
             </button>
           )}
 
@@ -146,7 +175,7 @@ export const OrderTracking = () => {
           )}
 
           <button onClick={() => setIsComplaintOpen(true)} className="btn btn-secondary btn-sm" style={{ color: '#f87171' }}>
-            <ShieldAlert size={16} /> File Dispute / Complaint
+            <ShieldAlert size={16} /> Need help with your order?
           </button>
         </div>
       </div>
