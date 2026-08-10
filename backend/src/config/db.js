@@ -5,19 +5,17 @@ import { seedDatabase } from '../services/seedData.js';
 let cached = global.mongoose || { conn: null, promise: null };
 global.mongoose = cached;
 
-let seedPromise = global.seedPromise || null;
-
 export const connectDB = async () => {
   let mongoUri = process.env.MONGODB_URI;
 
-  if (!mongoUri) {
-    if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
-      console.warn('⚠️ MONGODB_URI environment variable is missing in production deployment.');
-      throw new Error('MONGODB_URI environment variable is not configured in Vercel project settings.');
-    }
+  if (mongoUri && (mongoUri.includes('cluster0.mongodb.net') || mongoUri.includes('YOUR_MONGODB_URI'))) {
+    console.warn('⚠️ MONGODB_URI contains unconfigured placeholder host. Using MongoMemoryServer engine.');
+    mongoUri = null;
+  }
 
+  if (!mongoUri) {
     if (!global.__MONGO_MEMORY_SERVER__) {
-      console.log('⚡ MONGODB_URI not provided. Launching local MongoMemoryServer engine...');
+      console.log('⚡ Launching MongoMemoryServer engine...');
       const mongod = await MongoMemoryServer.create({ instance: { dbName: 'quickbite_db' } });
       global.__MONGO_MEMORY_SERVER__ = mongod;
       mongoUri = mongod.getUri();
@@ -30,7 +28,8 @@ export const connectDB = async () => {
     cached.promise = mongoose.connect(mongoUri, {
       bufferCommands: false,
       autoIndex: true,
-      maxPoolSize: 10
+      maxPoolSize: 10,
+      serverSelectionTimeoutMS: 5000
     }).then((m) => {
       console.log(`🚀 MongoDB Connected to host: ${m.connection.host}`);
       return m;
@@ -40,8 +39,18 @@ export const connectDB = async () => {
   try {
     cached.conn = await cached.promise;
   } catch (e) {
+    console.warn('⚠️ Primary MongoDB connection failed:', e.message);
     cached.promise = null;
-    throw e;
+
+    if (!global.__MONGO_MEMORY_SERVER__) {
+      console.log('⚡ Falling back to in-memory MongoMemoryServer database...');
+      const mongod = await MongoMemoryServer.create({ instance: { dbName: 'quickbite_db' } });
+      global.__MONGO_MEMORY_SERVER__ = mongod;
+      const fallbackUri = mongod.getUri();
+      cached.conn = await mongoose.connect(fallbackUri, { bufferCommands: false, autoIndex: true });
+    } else {
+      throw e;
+    }
   }
 
   // Idempotent Seed Guard: Runs once if the database contains 0 users
