@@ -54,10 +54,10 @@ export const DeliveryDashboard = () => {
       const res = await api.patch('/delivery/availability', { isAvailable: nextAvailable });
       if (res.data.success) {
         setIsAvailable(res.data.isAvailable);
-        addToast(`Duty status set to ${res.data.isAvailable ? 'ONLINE' : 'OFFLINE'}`, 'info');
+        addToast(`Duty status updated to ${res.data.isAvailable ? 'ONLINE' : 'OFFLINE'}`, 'info');
       }
     } catch (err) {
-      addToast(err.response?.data?.message || 'Couldn\'t change your availability status. Please try again.', 'danger');
+      addToast(err.response?.data?.message || 'Could not update status. Please try again.', 'danger');
     }
   };
 
@@ -77,7 +77,7 @@ export const DeliveryDashboard = () => {
     try {
       const res = await api.post(`/delivery/assignments/${assignmentId}/reject`, { reason: 'Partner busy' });
       if (res.data.success) {
-        addToast('Trip declined. Order reassigned to next available rider.', 'warning');
+        addToast('Trip declined. Reassigned to next available rider.', 'warning');
         fetchAssignmentsOnly();
       }
     } catch (err) {
@@ -98,8 +98,8 @@ export const DeliveryDashboard = () => {
   };
 
   if (loading) return (
-    <div className="main-content theme-dark" style={{ padding: '80px 20px', textAlign: 'center' }}>
-      <div className="skeleton" style={{ height: 28, width: 240, margin: '0 auto 16px' }} />
+    <div className="main-content theme-dark" style={{ padding: '60px 18px', textAlign: 'center' }}>
+      <div className="skeleton" style={{ height: 24, width: 220, margin: '0 auto 12px' }} />
       <p style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Loading rider console...</p>
     </div>
   );
@@ -107,93 +107,97 @@ export const DeliveryDashboard = () => {
   const driverName = user?.name ? user.name.split(' ')[0] : 'David';
 
   return (
-    <div className="main-content theme-dark" style={{ maxWidth: 840 }}>
-      {/* Duty Status & Earnings Header */}
-      <div className="card" style={{ marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
+    <div className="main-content theme-dark" style={{ maxWidth: 760 }}>
+      {/* Driver Header & Duty Controls */}
+      <div className="card" style={{ marginBottom: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 14 }}>
         <div>
-          <div style={{ fontSize: '0.88rem', color: 'var(--text-muted)', marginBottom: 2 }}>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: 2 }}>
             Good morning, {driverName} 👋
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <h1 style={{ fontSize: '1.75rem', fontWeight: 800 }}>Rider Fleet Console</h1>
-            <span style={{ padding: '4px 12px', borderRadius: 'var(--radius-full)', fontSize: '0.78rem', fontWeight: 800, background: isAvailable ? 'rgba(34, 197, 94, 0.18)' : 'rgba(239, 68, 68, 0.18)', color: isAvailable ? '#4ade80' : '#f87171' }}>
-              {isAvailable ? '● ONLINE' : '○ OFFLINE'}
-            </span>
-          </div>
+          </h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem' }}>
+            You're {isAvailable ? 'online and ready for deliveries.' : 'currently offline.'}
+          </p>
         </div>
 
-        <button onClick={handleToggleAvailability} className={`btn ${isAvailable ? 'btn-danger' : 'btn-success'}`}>
-          <Power size={16} /> {isAvailable ? 'Go Offline' : 'Go Online'}
-        </button>
-      </div>
-
-      {/* Driver Earnings Bar */}
-      <div className="grid-3" style={{ marginBottom: 28 }}>
-        <div className="card">
-          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>Today's Earnings</div>
-          <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--primary)', marginTop: 2 }}>${earnings?.totalEarnings || 0}</div>
-        </div>
-        <div className="card">
-          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>Completed Trips</div>
-          <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#ffffff', marginTop: 2 }}>{earnings?.totalCompleted || 0}</div>
-        </div>
-        <div className="card">
-          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>Payout Per Trip</div>
-          <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#38bdf8', marginTop: 2 }}>$45</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span style={{ padding: '4px 12px', borderRadius: 'var(--radius-full)', fontSize: '0.78rem', fontWeight: 800, background: isAvailable ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)', color: isAvailable ? '#4ade80' : '#f87171' }}>
+            {isAvailable ? '● ONLINE' : '○ OFFLINE'}
+          </span>
+          <button onClick={handleToggleAvailability} className={`btn btn-sm ${isAvailable ? 'btn-secondary' : 'btn-success'}`}>
+            <Power size={14} /> {isAvailable ? 'Go Offline' : 'Go Online'}
+          </button>
         </div>
       </div>
 
-      {/* Active Trips Focus */}
-      <h2 style={{ fontSize: '1.3rem', fontWeight: 800, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 10 }}>
-        <Bike size={24} style={{ color: 'var(--primary)' }} /> Active Delivery Assignment ({assignments.length})
+      {/* Driver Progress Bar */}
+      <div className="card" style={{ marginBottom: 24, display: 'flex', justifyContent: 'space-around', alignItems: 'center', textAlign: 'center', padding: '14px 20px' }}>
+        <div>
+          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>Today's Earnings</div>
+          <div style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--primary)' }}>${earnings?.totalEarnings || 0}</div>
+        </div>
+        <div style={{ width: 1, height: 32, background: 'var(--border-color)' }} />
+        <div>
+          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>Completed Deliveries</div>
+          <div style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--text-main)' }}>{earnings?.totalCompleted || 0}</div>
+        </div>
+        <div style={{ width: 1, height: 32, background: 'var(--border-color)' }} />
+        <div>
+          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>Per Trip Payout</div>
+          <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#38bdf8' }}>$45</div>
+        </div>
+      </div>
+
+      {/* Active Trip Task */}
+      <h2 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
+        <Bike size={22} style={{ color: 'var(--primary)' }} /> Current Active Trip
       </h2>
 
       {assignments.length === 0 ? (
-        <div className="card" style={{ textAlign: 'center', padding: '50px 20px', color: 'var(--text-muted)', marginBottom: 32 }}>
-          <Bike size={44} style={{ color: '#64748b', marginBottom: 12 }} />
-          <p style={{ fontSize: '1rem', fontWeight: 700, color: '#ffffff' }}>No active deliveries right now</p>
-          <p style={{ fontSize: '0.86rem', marginTop: 4 }}>Stay online and we'll send your next trip here.</p>
+        <div className="card" style={{ textAlign: 'center', padding: '36px 20px', color: 'var(--text-muted)', marginBottom: 28 }}>
+          <Bike size={36} style={{ color: 'var(--text-muted)', marginBottom: 8 }} />
+          <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: 4 }}>No delivery assigned yet</h3>
+          <p style={{ fontSize: '0.85rem' }}>Stay online and we'll let you know when a delivery comes in.</p>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 20, marginBottom: 32 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 28 }}>
           {assignments.map((asgn) => {
             const order = asgn.orderId;
             if (!order) return null;
 
             return (
-              <div key={asgn._id} className="card" style={{ borderLeft: '5px solid var(--primary)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <div key={asgn._id} className="card" style={{ borderLeft: '4px solid var(--primary)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
                   <div>
-                    <span style={{ fontWeight: 800, fontSize: '1.2rem', color: 'var(--primary)' }}>Order #{order.orderNumber}</span>
-                    <span style={{ marginLeft: 12, fontSize: '0.9rem', color: '#4ade80', fontWeight: 800 }}>+ $45 Payout</span>
+                    <span style={{ fontWeight: 800, fontSize: '1.1rem', color: 'var(--primary)' }}>Order #{order.orderNumber}</span>
+                    <span style={{ marginLeft: 10, fontSize: '0.85rem', color: '#4ade80', fontWeight: 800 }}>+ $45 Payout</span>
                   </div>
                   <StatusBadge status={order.status} />
                 </div>
 
-                {/* Pickup & Dropoff Cards */}
-                <div className="grid-2" style={{ marginBottom: 20 }}>
-                  <div style={{ background: 'var(--bg-main)', padding: 14, borderRadius: 'var(--radius-sm)' }}>
-                    <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-                      <Store size={15} style={{ color: 'var(--primary)' }} /> PICK UP FROM
+                {/* Pickup & Dropoff */}
+                <div className="grid-2" style={{ marginBottom: 16 }}>
+                  <div style={{ background: 'var(--bg-page)', padding: 12, borderRadius: 'var(--radius-sm)' }}>
+                    <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4 }}>
+                      <Store size={14} style={{ color: 'var(--primary)' }} /> PICK UP FROM
                     </div>
-                    <div style={{ fontWeight: 800, fontSize: '1rem' }}>{order.restaurantId?.name}</div>
-                    <div style={{ fontSize: '0.85rem', color: '#cbd5e1' }}>{order.restaurantId?.address?.street}</div>
+                    <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-main)' }}>{order.restaurantId?.name}</div>
+                    <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>{order.restaurantId?.address?.street}</div>
                   </div>
 
-                  <div style={{ background: 'var(--bg-main)', padding: 14, borderRadius: 'var(--radius-sm)' }}>
-                    <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-                      <MapPin size={15} style={{ color: '#38bdf8' }} /> DELIVER TO
+                  <div style={{ background: 'var(--bg-page)', padding: 12, borderRadius: 'var(--radius-sm)' }}>
+                    <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4 }}>
+                      <MapPin size={14} style={{ color: '#38bdf8' }} /> DELIVER TO
                     </div>
-                    <div style={{ fontWeight: 800, fontSize: '1rem' }}>{order.customerId?.name} ({order.customerId?.phone})</div>
-                    <div style={{ fontSize: '0.85rem', color: '#cbd5e1' }}>{order.deliveryAddress?.street}, {order.deliveryAddress?.city}</div>
+                    <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-main)' }}>{order.customerId?.name} ({order.customerId?.phone})</div>
+                    <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>{order.deliveryAddress?.street}, {order.deliveryAddress?.city}</div>
                   </div>
                 </div>
 
                 {/* Dominant Next Step Button */}
                 <div>
                   {asgn.status === 'ASSIGNED' && (
-                    <div style={{ display: 'flex', gap: 12 }}>
-                      <button onClick={() => handleAcceptAssignment(asgn._id)} className="btn btn-success" style={{ flex: 1, padding: 14, fontSize: '1rem' }}>
+                    <div style={{ display: 'flex', gap: 10 }}>
+                      <button onClick={() => handleAcceptAssignment(asgn._id)} className="btn btn-success" style={{ flex: 1, padding: 12 }}>
                         Accept Delivery Trip
                       </button>
                       <button onClick={() => handleRejectAssignment(asgn._id)} className="btn btn-danger btn-sm">
@@ -205,23 +209,23 @@ export const DeliveryDashboard = () => {
                   {asgn.status === 'ACCEPTED' && (
                     <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
                       {['DELIVERY_ASSIGNED', 'READY_FOR_PICKUP'].includes(order.status) && (
-                        <button onClick={() => handleUpdateDeliveryStatus(order._id, 'AT_RESTAURANT')} className="btn btn-primary" style={{ flex: 1, padding: 14, fontSize: '1rem' }}>
-                          <Navigation size={18} /> I've Arrived at Restaurant
+                        <button onClick={() => handleUpdateDeliveryStatus(order._id, 'AT_RESTAURANT')} className="btn btn-primary" style={{ flex: 1, padding: 12 }}>
+                          <Navigation size={16} /> I've Arrived at Restaurant
                         </button>
                       )}
                       {order.status === 'AT_RESTAURANT' && (
-                        <button onClick={() => handleUpdateDeliveryStatus(order._id, 'PICKED_UP')} className="btn btn-success" style={{ flex: 1, padding: 14, fontSize: '1rem' }}>
-                          <CheckCircle size={18} /> Confirm Food Picked Up
+                        <button onClick={() => handleUpdateDeliveryStatus(order._id, 'PICKED_UP')} className="btn btn-success" style={{ flex: 1, padding: 12 }}>
+                          <CheckCircle size={16} /> Confirm Food Picked Up
                         </button>
                       )}
                       {order.status === 'PICKED_UP' && (
-                        <button onClick={() => handleUpdateDeliveryStatus(order._id, 'OUT_FOR_DELIVERY')} className="btn btn-primary" style={{ flex: 1, padding: 14, fontSize: '1rem' }}>
-                          <Navigation size={18} /> Start Navigation to Customer
+                        <button onClick={() => handleUpdateDeliveryStatus(order._id, 'OUT_FOR_DELIVERY')} className="btn btn-primary" style={{ flex: 1, padding: 12 }}>
+                          <Navigation size={16} /> Start Delivery Navigation
                         </button>
                       )}
                       {order.status === 'OUT_FOR_DELIVERY' && (
-                        <button onClick={() => handleUpdateDeliveryStatus(order._id, 'DELIVERED')} className="btn btn-success" style={{ flex: 1, padding: 14, fontSize: '1rem' }}>
-                          <CheckCircle size={18} /> Complete Delivery & Collect Payout
+                        <button onClick={() => handleUpdateDeliveryStatus(order._id, 'DELIVERED')} className="btn btn-success" style={{ flex: 1, padding: 12 }}>
+                          <CheckCircle size={16} /> Complete Delivery & Collect Payout
                         </button>
                       )}
                     </div>

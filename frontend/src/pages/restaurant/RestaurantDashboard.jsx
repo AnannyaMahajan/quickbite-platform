@@ -64,7 +64,7 @@ export const RestaurantDashboard = () => {
         addToast(`Restaurant status set to ${label}`, 'success');
       }
     } catch (err) {
-      addToast(err.response?.data?.message || 'Could not update restaurant status. Please try again.', 'danger');
+      addToast(err.response?.data?.message || 'Could not update status. Please try again.', 'danger');
     }
   };
 
@@ -107,26 +107,25 @@ export const RestaurantDashboard = () => {
   };
 
   if (loading) return (
-    <div className="main-content theme-dark" style={{ padding: '80px 20px', textAlign: 'center' }}>
-      <div className="skeleton" style={{ height: 28, width: 260, margin: '0 auto 16px' }} />
+    <div className="main-content theme-dark" style={{ padding: '60px 18px', textAlign: 'center' }}>
+      <div className="skeleton" style={{ height: 24, width: 220, margin: '0 auto 12px' }} />
       <p style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Opening kitchen workspace...</p>
     </div>
   );
 
   const incomingOrders = orders.filter((o) => o.status === 'PLACED');
   const activePrepOrders = orders.filter((o) => ['RESTAURANT_ACCEPTED', 'PREPARING'].includes(o.status));
-  const ownerName = user?.name ? user.name.split(' ')[0] : 'Marco';
 
   return (
     <div className="main-content theme-dark">
-      {/* Restaurant Owner Greeting & Store Switcher */}
-      <div className="card" style={{ marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
+      {/* Owner Header */}
+      <div className="card" style={{ marginBottom: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 14 }}>
         <div>
-          <div style={{ fontSize: '0.88rem', color: 'var(--text-muted)', marginBottom: 2 }}>
-            Welcome back, {ownerName} 👋
+          <div style={{ fontSize: '0.86rem', color: 'var(--text-muted)', marginBottom: 2 }}>
+            Welcome back, Chef 👋
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <h1 style={{ fontSize: '1.75rem', fontWeight: 800 }}>{restaurant?.name || 'Your Kitchen'}</h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <h1 style={{ fontSize: '1.65rem', fontWeight: 800 }}>{restaurant?.name || 'Trattoria Bella'}</h1>
             <StatusBadge status={restaurant?.status || 'OPEN'} />
           </div>
         </div>
@@ -143,45 +142,41 @@ export const RestaurantDashboard = () => {
             onClick={() => handleStatusToggle('TEMPORARILY_UNAVAILABLE')}
             className={`btn btn-sm ${restaurant?.status === 'TEMPORARILY_UNAVAILABLE' ? 'btn-danger' : 'btn-secondary'}`}
           >
-            ⏸ PAUSE ORDERS
+            PAUSE ORDERS
           </button>
           <button
             onClick={() => handleStatusToggle('CLOSED')}
             className={`btn btn-sm ${restaurant?.status === 'CLOSED' ? 'btn-secondary' : 'btn-secondary'}`}
           >
-            🔴 CLOSED
+            CLOSED
           </button>
         </div>
       </div>
 
-      {/* Overview Metrics Bar */}
-      <div className="grid-4" style={{ marginBottom: 28 }}>
-        <div className="card">
-          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>Today's Sales</div>
-          <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--primary)', marginTop: 2 }}>${analytics?.totalRevenue || 0}</div>
+      {/* Snapshot Stats Bar */}
+      <div className="grid-3" style={{ marginBottom: 24 }}>
+        <div className="card" style={{ textAlign: 'center', padding: 14 }}>
+          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>Today's Sales</div>
+          <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--primary)' }}>${analytics?.totalRevenue || 0}</div>
         </div>
-        <div className="card">
-          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>Orders Today</div>
-          <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#ffffff', marginTop: 2 }}>{analytics?.totalOrders || 0}</div>
+        <div className="card" style={{ textAlign: 'center', padding: 14 }}>
+          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>Total Orders</div>
+          <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-main)' }}>{analytics?.totalOrders || 0}</div>
         </div>
-        <div className="card">
-          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>Kitchen Rating</div>
-          <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#f59e0b', marginTop: 2 }}>⭐ {restaurant?.rating || 4.8}</div>
-        </div>
-        <div className="card">
-          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>Active Queue</div>
-          <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#38bdf8', marginTop: 2 }}>{incomingOrders.length + activePrepOrders.length}</div>
+        <div className="card" style={{ textAlign: 'center', padding: 14 }}>
+          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>Customer Rating</div>
+          <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#f59e0b' }}>★ {restaurant?.rating || 4.2}</div>
         </div>
       </div>
 
-      {/* Workspace Navigation Tabs */}
-      <div style={{ display: 'flex', gap: 12, borderBottom: '1px solid var(--border-color)', marginBottom: 28 }}>
+      {/* Workspace Tabs */}
+      <div style={{ display: 'flex', gap: 10, borderBottom: '1px solid var(--border-color)', marginBottom: 24 }}>
         <button
           onClick={() => setActiveTab('orders')}
           style={{
-            padding: '12px 20px',
+            padding: '10px 18px',
             fontWeight: 700,
-            fontSize: '0.92rem',
+            fontSize: '0.9rem',
             color: activeTab === 'orders' ? 'var(--primary)' : 'var(--text-muted)',
             borderBottom: activeTab === 'orders' ? '3px solid var(--primary)' : 'none',
             background: 'none'
@@ -192,45 +187,47 @@ export const RestaurantDashboard = () => {
         <button
           onClick={() => setActiveTab('menu')}
           style={{
-            padding: '12px 20px',
+            padding: '10px 18px',
             fontWeight: 700,
-            fontSize: '0.92rem',
+            fontSize: '0.9rem',
             color: activeTab === 'menu' ? 'var(--primary)' : 'var(--text-muted)',
             borderBottom: activeTab === 'menu' ? '3px solid var(--primary)' : 'none',
             background: 'none'
           }}
         >
-          Menu & Stock Manager ({menuItems.length})
+          Menu Manager ({menuItems.length})
         </button>
       </div>
 
-      {/* KITCHEN ORDERS TAB */}
+      {/* ORDERS TAB */}
       {activeTab === 'orders' && (
         <div className="grid-2">
           {/* Needs Attention */}
           <div>
-            <h3 style={{ fontSize: '1.15rem', fontWeight: 800, marginBottom: 16, color: '#f59e0b', display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Clock size={20} /> Needs Action Right Now ({incomingOrders.length})
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 800, marginBottom: 14, color: '#f59e0b', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Clock size={18} /> Needs Action Right Now ({incomingOrders.length})
             </h3>
             {incomingOrders.length === 0 ? (
-              <div className="card" style={{ textAlign: 'center', color: 'var(--text-muted)', padding: 36 }}>No new incoming orders. You're all caught up!</div>
+              <div className="card" style={{ textAlign: 'center', color: 'var(--text-muted)', padding: 28, fontSize: '0.88rem' }}>
+                No new orders right now. You're all caught up.
+              </div>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                 {incomingOrders.map((o) => (
                   <div key={o._id} className="card" style={{ borderLeft: '4px solid #f59e0b' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
-                      <span style={{ fontWeight: 800, fontSize: '1.1rem', color: 'var(--primary)' }}>#{o.orderNumber}</span>
-                      <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>{new Date(o.createdAt).toLocaleTimeString()}</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                      <span style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--primary)' }}>#{o.orderNumber}</span>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{new Date(o.createdAt).toLocaleTimeString()}</span>
                     </div>
-                    <div style={{ background: 'var(--bg-main)', padding: 12, borderRadius: 'var(--radius-sm)', marginBottom: 14, fontSize: '0.88rem' }}>
+                    <div style={{ background: 'var(--bg-page)', padding: 10, borderRadius: 'var(--radius-sm)', marginBottom: 12, fontSize: '0.85rem' }}>
                       {o.items.map((item, idx) => (
-                        <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                        <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
                           <span>{item.name} × {item.quantity}</span>
                           <span style={{ fontWeight: 700 }}>${item.subtotal}</span>
                         </div>
                       ))}
                     </div>
-                    <div style={{ display: 'flex', gap: 10 }}>
+                    <div style={{ display: 'flex', gap: 8 }}>
                       <button onClick={() => handleOrderTransition(o._id, 'RESTAURANT_ACCEPTED')} className="btn btn-success btn-sm" style={{ flex: 1 }}>
                         Accept Order
                       </button>
@@ -244,22 +241,24 @@ export const RestaurantDashboard = () => {
             )}
           </div>
 
-          {/* Kitchen Preparation */}
+          {/* Kitchen Cooking */}
           <div>
-            <h3 style={{ fontSize: '1.15rem', fontWeight: 800, marginBottom: 16, color: '#38bdf8', display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Utensils size={20} /> Kitchen Cooking Queue ({activePrepOrders.length})
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 800, marginBottom: 14, color: '#38bdf8', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Utensils size={18} /> Kitchen Cooking Queue ({activePrepOrders.length})
             </h3>
             {activePrepOrders.length === 0 ? (
-              <div className="card" style={{ textAlign: 'center', color: 'var(--text-muted)', padding: 36 }}>No orders cooking right now.</div>
+              <div className="card" style={{ textAlign: 'center', color: 'var(--text-muted)', padding: 28, fontSize: '0.88rem' }}>
+                No orders cooking right now.
+              </div>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                 {activePrepOrders.map((o) => (
                   <div key={o._id} className="card" style={{ borderLeft: '4px solid #38bdf8' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
-                      <span style={{ fontWeight: 800, fontSize: '1.1rem', color: 'var(--primary)' }}>#{o.orderNumber}</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                      <span style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--primary)' }}>#{o.orderNumber}</span>
                       <StatusBadge status={o.status} />
                     </div>
-                    <div style={{ background: 'var(--bg-main)', padding: 12, borderRadius: 'var(--radius-sm)', marginBottom: 14, fontSize: '0.88rem' }}>
+                    <div style={{ background: 'var(--bg-page)', padding: 10, borderRadius: 'var(--radius-sm)', marginBottom: 12, fontSize: '0.85rem' }}>
                       {o.items.map((item, idx) => (
                         <div key={idx} style={{ marginBottom: 2 }}>• {item.name} × {item.quantity}</div>
                       ))}
@@ -271,7 +270,7 @@ export const RestaurantDashboard = () => {
                     )}
                     {o.status === 'PREPARING' && (
                       <button onClick={() => handleOrderTransition(o._id, 'READY_FOR_PICKUP')} className="btn btn-success btn-sm" style={{ width: '100%' }}>
-                        <CheckCircle2 size={16} /> Food Ready for Rider Pickup
+                        <CheckCircle2 size={15} /> Food Ready for Pickup
                       </button>
                     )}
                   </div>
@@ -285,22 +284,22 @@ export const RestaurantDashboard = () => {
       {/* MENU TAB */}
       {activeTab === 'menu' && (
         <div>
-          <div className="card" style={{ marginBottom: 24 }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 800, marginBottom: 14 }}>Add New Menu Item</h3>
-            <form onSubmit={handleAddMenuItem} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14 }}>
+          <div className="card" style={{ marginBottom: 20 }}>
+            <h3 style={{ fontSize: '1.05rem', fontWeight: 800, marginBottom: 12 }}>Add New Menu Item</h3>
+            <form onSubmit={handleAddMenuItem} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 }}>
               <input type="text" placeholder="Item Name" className="form-input" value={newItem.name} onChange={(e) => setNewItem({ ...newItem, name: e.target.value })} required />
               <input type="number" placeholder="Price ($)" className="form-input" value={newItem.price} onChange={(e) => setNewItem({ ...newItem, price: e.target.value })} required />
               <input type="number" placeholder="Stock Quantity" className="form-input" value={newItem.quantity} onChange={(e) => setNewItem({ ...newItem, quantity: e.target.value })} />
-              <button type="submit" className="btn btn-primary btn-sm" style={{ height: 44 }}><Plus size={16} /> Add Item</button>
+              <button type="submit" className="btn btn-primary btn-sm" style={{ height: 42 }}><Plus size={15} /> Add Item</button>
             </form>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {menuItems.map((item) => (
-              <div key={item._id} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div key={item._id} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 14 }}>
                 <div>
-                  <div style={{ fontWeight: 800, fontSize: '1.05rem' }}>{item.name}</div>
-                  <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>${item.price} • Stock: {item.quantity} units</div>
+                  <div style={{ fontWeight: 800, fontSize: '0.98rem' }}>{item.name}</div>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>${item.price} • Stock: {item.quantity} units</div>
                 </div>
                 <button
                   onClick={() => handleToggleItemAvailability(item._id, item.isAvailable)}
