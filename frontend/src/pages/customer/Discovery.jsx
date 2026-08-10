@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
-import { Search, Star, Clock, UtensilsCrossed } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { Search, Star, Clock, Utensils, MapPin } from 'lucide-react';
 import { StatusBadge } from '../../components/StatusBadge';
 
 export const Discovery = () => {
+  const { user } = useAuth();
   const [restaurants, setRestaurants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [selectedCuisine, setSelectedCuisine] = useState('ALL');
   const navigate = useNavigate();
 
-  const cuisines = ['ALL', 'Italian', 'Indian', 'Japanese', 'Mexican', 'American', 'Chinese', 'Vegan', 'Thai', 'Middle Eastern', 'Korean'];
+  const cuisines = ['ALL', 'Italian', 'Indian', 'Japanese', 'Mexican', 'American', 'Chinese', 'Vegan', 'Thai', 'Middle Eastern'];
 
   useEffect(() => {
     fetchRestaurants();
@@ -33,20 +35,25 @@ export const Discovery = () => {
     }
   };
 
+  const userName = user?.name ? user.name.split(' ')[0] : 'there';
+
   return (
     <div className="main-content">
-      {/* Friendly Hero Banner */}
-      <div style={{ marginBottom: 32, textAlign: 'center' }}>
-        <h1 style={{ fontSize: '2.2rem', fontWeight: 800, marginBottom: 8, letterSpacing: '-0.5px' }}>
-          What's on your mind today?
+      {/* Consumer Greeting & Search */}
+      <div style={{ marginBottom: 32 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.88rem', color: 'var(--text-muted)', marginBottom: 4 }}>
+          <MapPin size={16} style={{ color: 'var(--primary)' }} /> Delivering to <strong style={{ color: 'var(--text-main)' }}>456 Ocean Ave, Metropolis</strong>
+        </div>
+        <h1 style={{ fontSize: '2.1rem', fontWeight: 800, marginBottom: 4, letterSpacing: '-0.5px' }}>
+          Good evening, {userName} 👋
         </h1>
-        <p style={{ color: 'var(--text-muted)', fontSize: '1rem', marginBottom: 24 }}>
-          Discover delicious meals from Metropolis's favorite kitchens
+        <p style={{ color: 'var(--text-muted)', fontSize: '1rem', marginBottom: 20 }}>
+          What are you craving today?
         </p>
 
-        {/* Inviting Search Bar */}
-        <div style={{ maxWidth: 640, margin: '0 auto', position: 'relative' }}>
-          <Search style={{ position: 'absolute', left: 18, top: 15, color: '#64748b' }} size={20} />
+        {/* Search Bar */}
+        <div style={{ position: 'relative', maxWidth: 640 }}>
+          <Search style={{ position: 'absolute', left: 16, top: 16, color: '#94a3b8' }} size={20} />
           <input
             type="text"
             className="form-input"
@@ -55,19 +62,19 @@ export const Discovery = () => {
             onChange={(e) => setSearch(e.target.value)}
             style={{
               width: '100%',
-              paddingLeft: 50,
+              paddingLeft: 48,
               height: 52,
-              fontSize: '1rem',
+              fontSize: '0.98rem',
               borderRadius: 'var(--radius-full)',
-              background: 'var(--bg-surface)',
-              border: '1px solid var(--border-color)'
+              border: '1px solid #cbd5e1',
+              boxShadow: 'var(--shadow-sm)'
             }}
           />
         </div>
       </div>
 
-      {/* Cuisine Filter Pills */}
-      <div style={{ display: 'flex', gap: 10, overflowX: 'auto', paddingBottom: 14, marginBottom: 28, scrollbarWidth: 'none' }}>
+      {/* Category Pills */}
+      <div style={{ display: 'flex', gap: 10, overflowX: 'auto', paddingBottom: 12, marginBottom: 28, scrollbarWidth: 'none' }}>
         {cuisines.map((c) => (
           <button
             key={c}
@@ -78,10 +85,10 @@ export const Discovery = () => {
               fontSize: '0.88rem',
               fontWeight: 700,
               whiteSpace: 'nowrap',
-              background: selectedCuisine === c ? 'var(--primary)' : '#1e293b',
-              color: selectedCuisine === c ? '#ffffff' : 'var(--text-muted)',
-              border: '1px solid #334155',
-              boxShadow: selectedCuisine === c ? 'var(--shadow-glow)' : 'none',
+              background: selectedCuisine === c ? 'var(--primary)' : '#ffffff',
+              color: selectedCuisine === c ? '#ffffff' : 'var(--text-main)',
+              border: selectedCuisine === c ? 'none' : '1px solid #e2e8f0',
+              boxShadow: selectedCuisine === c ? 'var(--shadow-glow)' : 'var(--shadow-sm)',
               transition: 'all 0.18s ease'
             }}
           >
@@ -90,18 +97,18 @@ export const Discovery = () => {
         ))}
       </div>
 
-      {/* Restaurant Grid */}
+      {/* Restaurant Cards List */}
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '80px 20px', color: 'var(--text-muted)' }}>
-          <div className="skeleton" style={{ height: 24, width: 220, margin: '0 auto 16px' }} />
-          <p style={{ fontSize: '0.95rem', fontWeight: 600 }}>Finding great places to eat...</p>
+        <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-muted)' }}>
+          <div className="skeleton" style={{ height: 28, width: 220, margin: '0 auto 14px' }} />
+          <p style={{ fontWeight: 600 }}>Finding delicious choices near you...</p>
         </div>
       ) : restaurants.length === 0 ? (
         <div className="card" style={{ textAlign: 'center', padding: '60px 20px' }}>
-          <UtensilsCrossed size={48} style={{ color: '#64748b', marginBottom: 14 }} />
-          <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: 6 }}>Nothing tasty found here yet</h3>
+          <Utensils size={44} style={{ color: '#94a3b8', marginBottom: 12 }} />
+          <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: 6 }}>Nothing tasty found here yet</h3>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-            Try clearing your search or switching cuisine filters to explore more choices.
+            Try another cuisine or clear your search to explore more options.
           </p>
         </div>
       ) : (
@@ -113,49 +120,35 @@ export const Discovery = () => {
               onClick={() => navigate(`/customer/restaurants/${rest._id}`)}
               style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}
             >
-              <div style={{ height: 190, position: 'relative', overflow: 'hidden' }}>
+              <div style={{ height: 180, position: 'relative', overflow: 'hidden' }}>
                 <img
                   src={rest.image}
                   alt={rest.name}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.3s ease' }}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 />
                 <div style={{ position: 'absolute', top: 12, right: 12 }}>
                   <StatusBadge status={rest.status} />
                 </div>
-                <div
-                  style={{
-                    position: 'absolute',
-                    bottom: 12,
-                    left: 12,
-                    background: 'rgba(15, 23, 42, 0.85)',
-                    backdropFilter: 'blur(8px)',
-                    padding: '4px 12px',
-                    borderRadius: 'var(--radius-full)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 5,
-                    fontSize: '0.82rem',
-                    fontWeight: 800,
-                    color: '#f59e0b'
-                  }}
-                >
-                  <Star size={14} fill="#f59e0b" color="#f59e0b" /> {rest.rating} ({rest.totalRatings}+)
-                </div>
               </div>
 
-              <div style={{ padding: 20, flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              <div style={{ padding: 18, flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                 <div>
-                  <h3 style={{ fontSize: '1.15rem', fontWeight: 800, marginBottom: 4 }}>{rest.name}</h3>
-                  <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: 14 }}>
-                    {rest.cuisines.join(', ')} • ${rest.costForTwo} for two
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
+                    <h3 style={{ fontSize: '1.15rem', fontWeight: 800 }}>{rest.name}</h3>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4, background: '#fef3c7', color: '#b45309', padding: '2px 8px', borderRadius: 6, fontSize: '0.82rem', fontWeight: 800 }}>
+                      <Star size={13} fill="#b45309" color="#b45309" /> {rest.rating}
+                    </div>
+                  </div>
+                  <p style={{ fontSize: '0.86rem', color: 'var(--text-muted)', marginBottom: 12 }}>
+                    {rest.cuisines.join(' • ')}
                   </p>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.82rem', color: '#cbd5e1', paddingTop: 12, borderTop: '1px solid var(--border-color)' }}>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 600 }}>
-                    <Clock size={15} style={{ color: 'var(--primary)' }} /> {rest.avgDeliveryTimeMinutes} mins
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.84rem', color: 'var(--text-muted)', paddingTop: 12, borderTop: '1px solid #f1f5f9' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontWeight: 600 }}>
+                    <Clock size={14} style={{ color: 'var(--primary)' }} /> {rest.avgDeliveryTimeMinutes} mins
                   </span>
-                  <span style={{ color: 'var(--primary)', fontWeight: 700 }}>Explore Menu →</span>
+                  <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>${rest.costForTwo} for two</span>
                 </div>
               </div>
             </div>

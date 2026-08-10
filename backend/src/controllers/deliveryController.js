@@ -139,7 +139,17 @@ export const getEarnings = async (req, res, next) => {
 export const togglePartnerAvailability = async (req, res, next) => {
   try {
     const user = await User.findById(req.user._id);
-    user.isAvailable = !user.isAvailable;
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User account not found' });
+    }
+
+    const { isAvailable } = req.body;
+    if (isAvailable !== undefined) {
+      user.isAvailable = Boolean(isAvailable);
+    } else {
+      user.isAvailable = !user.isAvailable;
+    }
+
     await user.save();
 
     res.status(200).json({

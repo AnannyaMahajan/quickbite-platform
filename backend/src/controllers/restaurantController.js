@@ -10,7 +10,15 @@ export const getRestaurantProfile = async (req, res, next) => {
   try {
     let restaurant = await Restaurant.findOne({ ownerId: req.user._id });
     if (!restaurant) {
-      return res.status(404).json({ success: false, message: 'Restaurant profile not found for this owner.' });
+      restaurant = await Restaurant.create({
+        ownerId: req.user._id,
+        name: `${req.user.name}'s Kitchen`,
+        description: 'Authentic gourmet kitchen & dining',
+        cuisines: ['Italian', 'American', 'Continental'],
+        address: { street: '123 Gourmet Way', city: 'Metropolis', zipCode: '10001' },
+        status: 'OPEN',
+        isApproved: true
+      });
     }
     res.status(200).json({ success: true, restaurant });
   } catch (error) {
@@ -34,10 +42,10 @@ export const registerOrUpdateRestaurant = async (req, res, next) => {
     } else {
       restaurant = await Restaurant.create({
         ownerId: req.user._id,
-        name,
-        description,
+        name: name || `${req.user.name}'s Kitchen`,
+        description: description || 'Authentic kitchen',
         cuisines: cuisines || ['General'],
-        address,
+        address: address || { street: '123 Main St', city: 'Metropolis', zipCode: '10001' },
         operatingHours,
         costForTwo,
         isApproved: true
@@ -59,13 +67,21 @@ export const toggleRestaurantStatus = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Invalid status value' });
     }
 
-    const restaurant = await Restaurant.findOne({ ownerId: req.user._id });
+    let restaurant = await Restaurant.findOne({ ownerId: req.user._id });
     if (!restaurant) {
-      return res.status(404).json({ success: false, message: 'Restaurant profile not found' });
+      restaurant = await Restaurant.create({
+        ownerId: req.user._id,
+        name: `${req.user.name}'s Kitchen`,
+        description: 'Authentic gourmet kitchen',
+        cuisines: ['Italian', 'Continental'],
+        address: { street: '123 Gourmet Way', city: 'Metropolis', zipCode: '10001' },
+        status: status,
+        isApproved: true
+      });
+    } else {
+      restaurant.status = status;
+      await restaurant.save();
     }
-
-    restaurant.status = status;
-    await restaurant.save();
 
     // Real-Time Socket Broadcast to all connected clients
     emitSocketEvent('restaurant:status_changed', {
@@ -84,7 +100,7 @@ export const getRestaurantOrders = async (req, res, next) => {
   try {
     const restaurant = await Restaurant.findOne({ ownerId: req.user._id });
     if (!restaurant) {
-      return res.status(404).json({ success: false, message: 'Restaurant profile not found' });
+      return res.status(200).json({ success: true, count: 0, orders: [] });
     }
 
     const orders = await Order.find({ restaurantId: restaurant._id })
@@ -121,10 +137,18 @@ export const updateOrderStatus = async (req, res, next) => {
 export const addMenuItem = async (req, res, next) => {
   try {
     const { categoryName, name, description, price, isVeg, isAvailable, quantity, image } = req.body;
-    const restaurant = await Restaurant.findOne({ ownerId: req.user._id });
+    let restaurant = await Restaurant.findOne({ ownerId: req.user._id });
 
     if (!restaurant) {
-      return res.status(404).json({ success: false, message: 'Restaurant profile not found' });
+      restaurant = await Restaurant.create({
+        ownerId: req.user._id,
+        name: `${req.user.name}'s Kitchen`,
+        description: 'Gourmet dining',
+        cuisines: ['General'],
+        address: { street: '123 Main St', city: 'Metropolis', zipCode: '10001' },
+        status: 'OPEN',
+        isApproved: true
+      });
     }
 
     let category = await MenuCategory.findOne({ restaurantId: restaurant._id, name: categoryName });
