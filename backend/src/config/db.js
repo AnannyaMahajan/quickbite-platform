@@ -1,6 +1,12 @@
 import mongoose from 'mongoose';
-import { MongoMemoryServer } from 'mongodb-memory-server';
 import { seedDatabase } from '../services/seedData.js';
+
+// Configure MongoMemoryServer writable temp directory for Vercel/Serverless environments
+if (!process.env.MONGOMS_DOWNLOAD_DIR) {
+  process.env.MONGOMS_DOWNLOAD_DIR = '/tmp';
+}
+
+let MongoMemoryServer;
 
 let cached = global.mongoose || { conn: null, promise: null };
 global.mongoose = cached;
@@ -8,21 +14,27 @@ global.mongoose = cached;
 export const connectDB = async () => {
   let mongoUri = process.env.MONGODB_URI;
 
-  if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
-    if (!mongoUri || mongoUri.includes('cluster0.mongodb.net') || mongoUri.includes('YOUR_MONGODB_URI')) {
-      console.warn('⚠️ MONGODB_URI is missing or unconfigured in Vercel project settings.');
-      throw new Error('MONGODB_URI is missing or unconfigured in Vercel Project Settings. Please configure a valid MongoDB Atlas connection string in Vercel Environment Variables.');
+  if (mongoUri && (mongoUri.includes('cluster0.mongodb.net') || mongoUri.includes('YOUR_MONGODB_URI'))) {
+    console.warn('⚠️ MONGODB_URI contains unconfigured placeholder host. Falling back to in-memory database.');
+    mongoUri = null;
+  }
+
+  if (!mongoUri) {
+    if (!MongoMemoryServer) {
+      const module = await import('mongodb-memory-server');
+      MongoMemoryServer = module.MongoMemoryServer;
     }
-  } else {
-    if (!mongoUri) {
-      if (!global.__MONGO_MEMORY_SERVER__) {
-        console.log('⚡ Launching local MongoMemoryServer engine...');
-        const mongod = await MongoMemoryServer.create({ instance: { dbName: 'quickbite_db' } });
-        global.__MONGO_MEMORY_SERVER__ = mongod;
-        mongoUri = mongod.getUri();
-      } else {
-        mongoUri = global.__MONGO_MEMORY_SERVER__.getUri();
-      }
+
+    if (!global.__MONGO_MEMORY_SERVER__) {
+      console.log('⚡ Launching MongoMemoryServer engine in /tmp...');
+      const mongod = await MongoMemoryServer.create({
+        instance: { dbName: 'quickbite_db' },
+        binary: { downloadDir: '/tmp' }
+      });
+      global.__MONGO_MEMORY_SERVER__ = mongod;
+      mongoUri = mongod.getUri();
+    } else {
+      mongoUri = global.__MONGO_MEMORY_SERVER__.getUri();
     }
   }
 
@@ -46,6 +58,10 @@ export const connectDB = async () => {
   } catch (e) {
     console.warn('⚠️ MongoDB connection error:', e.message);
     cached.promise = null;
+
+    if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
+      throw new Error(`MongoDB Atlas Connection Failed: ${e.message}. Please verify MONGODB_URI configuration in Vercel project settings.`);
+    }
     throw e;
   }
 
